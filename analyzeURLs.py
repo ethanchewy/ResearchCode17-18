@@ -1,5 +1,8 @@
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
 import urllib, json
 from pprint import pprint
+import time
 
 #Load Json
 data = json.load(open('discordgg/December2016November2017.json'))
@@ -34,10 +37,23 @@ for what in timestamp:
 subReddits=[]
 for y in links:
 	subReddits.append(y.split('/')[4])
-	#pprint(y.split('/')[4])
+	
+# Path = where the "chromedriver" file is
+browser = webdriver.Chrome(executable_path='/usr/bin/chromedriver')
+browser.get('https://www.reddit.com/reddits')
 
-#Categorize subReddits
+#Get info on each search term
+inputBox = browser.find_element_by_name("q")
+info = []
+for channel in subReddits:
+    inputBox.clear()
+    inputBox.send_keys(channel)
+    inputBox.send_keys(Keys.ENTER)
+    time.sleep(3)
+    #find element 
+    info.append(browser.find_elements_by_class_name("md")[1].text)
+	
+#Combine Data for data processing
+arrays = zip(links, subReddits, timestamp, info)
+df = pd.DataFrame(data=arrays)
 
-#pandas dataframe
-bothArrays = zip(links, subReddits, timestamp)
-df = pd.DataFrame(data=bothArrays)
