@@ -52,6 +52,8 @@ for channel in subReddits:
     time.sleep(3)
     #find element 
     info.append(browser.find_elements_by_class_name("md")[1].text)
+    #Solution to stale element issue since element changes from the original q element
+    inputBox = browser.find_element_by_name("q")
 	
 #Combine Data for data processing
 arrays = zip(links, subReddits, timestamp, info)
