@@ -67,3 +67,6 @@ import pandas as pd
 arrays = zip(links, subReddits, timestamp, info, snippets)
 df = pd.DataFrame(data=arrays)
 df
+
+#Convert to csv file
+df.to_csv("December2016November2017discordgg.csv", encoding='utf-8', index=False)
