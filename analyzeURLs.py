@@ -55,7 +55,15 @@ for channel in subReddits:
     #Solution to stale element issue since element changes from the original q element
     inputBox = browser.find_element_by_name("q")
 	
-#Combine Data for data processing
-arrays = zip(links, subReddits, timestamp, info)
+#Get data for Snippets
+snippets=[]
+for a in data:
+	for b in a['results']:
+		snippets.append(b['snippet'])
+	
+import json
+import pandas as pd
+#Print out data in a nice spreadsheet
+arrays = zip(links, subReddits, timestamp, info, snippets)
 df = pd.DataFrame(data=arrays)
-
+df
