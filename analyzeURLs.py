@@ -1,8 +1,26 @@
+'''
+This script is for processing Google Scraping data I collected with my GoogleScraper modified scraper. 
+See Github repos & blog for more details
+'''
+
+
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 import urllib, json
 from pprint import pprint
 import time
+
+#Comment out if you are collecting for the first time
+#Import CSV data so that you don't have to recollect all the data again
+colnames = ['links', 'subReddits', 'timestamp', 'info', 'snippets']
+data = pandas.read_csv('December2016November2017discordgg.csv', names=colnames)
+links = data.links.tolist()
+subReddits = data.subReddits.tolist()
+timestamps = data.timestamp.tolist()
+#data.info is another function!
+infos = data["info"].tolist()
+snippets = data.snippets.tolist()
+#Note that lists' first element is the number indicating the position of the column in the csv file
 
 #Load Json
 data = json.load(open('discordgg/December2016November2017.json'))
