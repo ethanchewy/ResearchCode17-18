@@ -63,13 +63,18 @@ browser.get('https://www.reddit.com/reddits')
 #Get info on each search term
 inputBox = browser.find_element_by_name("q")
 info = []
+
 for channel in subReddits:
     inputBox.clear()
     inputBox.send_keys(channel)
     inputBox.send_keys(Keys.ENTER)
     time.sleep(3)
     #find element 
-    info.append(browser.find_elements_by_class_name("md")[1].text)
+    try:
+        elem = browser.find_elements_by_class_name("md")[1]
+        info.append(elem)
+    except IndexError:
+        info.append("")
     #Solution to stale element issue since element changes from the original q element
     inputBox = browser.find_element_by_name("q")
 	
