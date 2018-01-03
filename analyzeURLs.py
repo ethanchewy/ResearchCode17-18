@@ -64,7 +64,7 @@ for a in data:
 	for b in a['results']:
 		snippets.append(b['snippet'])
 
-#Processes data to get subreddit page and description
+#Process data to get subreddit page and description
 #Gathers as much info as possible for subreddit info
 #Subreddits have different CSS so be careful
 #Notes: https://docs.google.com/document/d/1pegankZVLFGLRIqEpfdQwilZ_T-cQkm7dyeQdOltFgU/edit
@@ -87,14 +87,15 @@ completeThread = []
 #For loop to process each link
 
 #Uncomment this if you are analyzing new data and not importing.
-#for a, b, c in zip(links, snippets, timestamp):
-for a, b, c, d, e in zip(links, snippets, timestamp, subReddits, info):
+for a, b, c in zip(links, snippets, timestamp):
+#for a, b, c, d, e in zip(links, snippets, timestamp, subReddits, info):
     
     #Try else loop to see if the link is actually a comment or post 
     #If not either, it's not reliable since it's probs related to a wiki page
     #Thus, if it's something like a wiki page, that means the timestamp could be incorrect
     try:
         part = a.split('/')[5]
+        print part
         browser.get(a)
         
         '''
@@ -106,7 +107,7 @@ for a, b, c, d, e in zip(links, snippets, timestamp, subReddits, info):
         
         try:
             partOfComment = a.split('/')[8]
-            typeOfPost = "Comment"
+            typeOfPost.append("Comment")
             elem = browser.find_elements_by_class_name("commentarea")[0]
             elem2 = elem.find_elements_by_class_name("sitetable")[0]
             content = elem2.find_elements_by_class_name("thing")[0]      
@@ -115,40 +116,45 @@ for a, b, c, d, e in zip(links, snippets, timestamp, subReddits, info):
             byLine = theComment.find_elements_by_class_name("tagline")[0]
             authorHREF = byLine.find_elements_by_tag_name("a")[1].get_attribute("href")
 
+            titleOfRedditPost.append("")
             originalPostContent.append(contentOfComment)
             authorLink.append(authorHREF)
             
         #Process Post in its entirety
         except IndexError:
+            #Temp solution to "Wiki" Issue
+            #Checks if it is a wiki page or just an empty string
+            if "wiki" in part or not part:
+                print "Removed that!"
+                links.remove(a)
+                snippets.remove(b)
+                timestamp.remove(c)
+                #Remove bottom two lines of code if not importing already collected data
+                #subReddits.remove(d)
+                #info.remove(e)
+            else: 
+                typeOfPost.append("Post")
 
-            typeOfPost = "Post"
-            
-            #Isloate elements and get texts
-            elem = browser.find_elements_by_class_name("entry")[0]
-            content = elem.find_elements_by_class_name("expando")[0].text      
-            frontmatter = elem.find_elements_by_class_name("top-matter")[0]
-            title = frontmatter.find_elements_by_class_name("title")[0].text
-            byLine = frontmatter.find_elements_by_class_name("tagline")[0]
-            authorHREF = byLine.find_elements_by_tag_name("a")[0].get_attribute("href")
+                #Isloate elements and get texts
+                elem = browser.find_elements_by_class_name("entry")[0]
+                content = elem.find_elements_by_class_name("expando")[0].text      
+                frontmatter = elem.find_elements_by_class_name("top-matter")[0]
+                title = frontmatter.find_elements_by_class_name("title")[0].text
+                byLine = frontmatter.find_elements_by_class_name("tagline")[0]
+                authorHREF = byLine.find_elements_by_tag_name("a")[0].get_attribute("href")
 
-            #Append to correct indice
-            titleOfRedditPost.append(title)
-            authorLink.append(authorHREF)
-            originalPostContent.append(content)
+                #Append to correct indice
+                titleOfRedditPost.append(title)
+                authorLink.append(authorHREF)
+                originalPostContent.append(content)
     except IndexError:
         links.remove(a)
         snippets.remove(b)
         timestamp.remove(c)
         #Remove bottom two lines of code if not importing already collected data
-        subReddits.remove(d)
-        info.remove(e)
+        #subReddits.remove(d)
+        #info.remove(e)
     time.sleep(3)
-    
-    
-print originalPostContent
-print titleOfRedditPost
-print typeOfPost 
-print authorLink
 
 # Path = where the "chromedriver" file is
 browser = webdriver.Chrome(executable_path='/usr/bin/chromedriver')
