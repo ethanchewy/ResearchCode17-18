@@ -28,11 +28,11 @@ snippets = data.snippets.tolist()
 data = json.load(open('discordgg/December2016November2017.json'))
 
 #Get Only Links from JSON
-links=[]
+dirtyLinks=[]
 
 for a in data:
 	for b in a['results']:
-		links.append(b['link'])
+		dirtyLinks.append(b['link'])
 		#pprint(b['link'])
 #Process time stamps correctly for data. 
 #Note that some are in the general data instead of the correct time slot
@@ -52,6 +52,9 @@ for a in data:
 
 for what in timestamp:
 	pprint(what)
+	
+#Clean links
+links = [dirtyLinks.strip(' ') for dirtyLinks in links]
 
 #Process data using regex to get subreddits
 subReddits=[]
