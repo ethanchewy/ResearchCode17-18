@@ -17,7 +17,6 @@ class InstagramItem(scrapy.Item):
     numLikes = scrapy.Field()
     numComments = scrapy.Field()
     date = scrapy.Field()
-    #location = scrapy.Field()
 
 ###### Instagram spider #######
 class instagramSpider(scrapy.Spider):
@@ -25,7 +24,7 @@ class instagramSpider(scrapy.Spider):
     ###### Name of spider, allowed space, and starting page #######
     name = 'insta_pictures_spider'
     allowed_domains = ['snap361.com']
-    start_urls = ["http://snap361.com/ig-user/[ENTER-USERNAME-HERE]/"]
+    start_urls = ["http://snap361.com/ig-user/ENTER_YUSERNAME_HERE/"]
 
     ###### Used to track page #######
     global page_num
@@ -47,7 +46,6 @@ class instagramSpider(scrapy.Spider):
             nLikes = Selector(text=post).xpath('//div[@class="post-meta"]//span[@class="likes"]/text()'
                                                ).extract()
             timestamp = Selector(text=post).xpath('//div[@class="post-meta"]//span[@class="time"]/text()').extract()
-            #place = Selector(text=post).xpath('//div[@class="post-views"]//span[@class="likes"]').extract()
             numCom = Selector(text=post).xpath('//div[@class="post-meta"]//span[@class="comments"]/text()').extract()
 
             ###### Checks to see if url exists before storing properties in item #######
@@ -57,24 +55,18 @@ class instagramSpider(scrapy.Spider):
                 item['numLikes'] = nLikes[0]
                 item['numComments'] = numCom[0]
                 item['date'] = timestamp[0]
-
-                """if len(place) == 2:
-                                                                    item['location'] = place[0]
-                                                                    item['numComments'] = numCom[1]
-                                                                else:
-                                                                    item['location'] = "NA"
-                                                                    item['numComments'] = numCom[0]"""
-                #item['caption'] = cap
                 yield item
 
         # follow next page links
         while(page_tries < 4):
-            next_page = response.xpath('//div[@class="nextpage"]/li/a/@href').extract()
+            next_page = response.xpath('//div[@class="nextpage"]/a/@href').extract()
+            base_url = "http://snap361.com"
             if next_page:
                 print "=" * 50
                 print "Go to next page"
                 page_tries = 5
-                next_href = next_page[0]
+                next_href = base_url + next_page[0]
+                print next_href
                 request = scrapy.Request(url=next_href, callback=self.parse)
                 page_num = page_num + 1
                 print page_num
@@ -84,5 +76,8 @@ class instagramSpider(scrapy.Spider):
                 print("on next page try:" + str(page_tries))
                 if(page_tries == 4):
                     print("No next page \n")
+
+
+
 
 
