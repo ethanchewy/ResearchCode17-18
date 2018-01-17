@@ -2,6 +2,47 @@
 #Uses NTLK and Hatebase libraries
 #Graphs top ten occurences of hate words!
 
+#ONLY DO ONCE
+#DO NOT WASTE API CALLS
+key = "ENTER_YOU_KEY_HERE"
+
+from json import loads
+from hatebase import HatebaseAPI
+
+hatebase = HatebaseAPI({"key": key})
+#"language": "eng"
+pagenumber = 1
+responses = []
+
+#Loads top 1000 results
+while pagenumber <= 11:
+    filters = {"country":"US", "page": str(pagenumber)}
+    output = "json"
+    query_type = "vocabulary"
+    response = hatebase.performRequest(filters, output, query_type)
+
+    # convert to Python object
+    responses.append(loads(response))
+    pagenumber += 1
+    
+print "Done getting API results"
+
+#Process Hate Words
+data = []
+for r in responses:
+    data.append(r["data"])
+#print len(data)
+listofHatewords = []
+
+#print len(data)
+for z in data:
+    for a, v in z.iteritems():
+        for b in v:
+            listofHatewords.append(b["vocabulary"])
+print listofHatewords
+listofHatewords = list(OrderedDict.fromkeys(listofHatewords))
+print len(listofHatewords)
+
 
 #Use ntlk and hatelibrary
 #http://www.nltk.org/book/ch01.html
