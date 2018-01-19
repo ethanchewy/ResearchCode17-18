@@ -44,6 +44,10 @@ listofHatewords = list(OrderedDict.fromkeys(listofHatewords))
 print len(listofHatewords)
 
 
+#Check hate word frequency
+
+
+
 #Use ntlk and hatelibrary
 #http://www.nltk.org/book/ch01.html
 #hatelibrary sign up for API: https://www.hatebase.org/login_register/registration_success
@@ -74,7 +78,7 @@ test123 = "dyke d*ke dy*e dnke"
 
 test123 = test123.split(" ")
 
-print difflib.get_close_matches("dyke", test123, 10, .5)"""
+print difflib.get_close_matches("dyke", test123, 10, .75)"""
 
 #python wrapper : https://github.com/DanielJDufour/hatebase
 
@@ -84,9 +88,17 @@ print difflib.get_close_matches("dyke", test123, 10, .5)"""
 #initiate lists to set length
 frequency = []
 versionsOfWord = []
+frequencyID = []
+frequencyTime = []
 for x in range(0, 1000):
     frequency.append(0)
 
+for x in range(0, 1000):
+    frequencyID.append([])
+
+for x in range(0, 1000):
+    frequencyTime.append([])
+    
 for x in range(0, 1000):
     versionsOfWord.append([])
 
@@ -104,16 +116,42 @@ for word in listofHatewords:
         versionsOfWord[index2] = forms
     index2 += 1
 print len(versionsOfWord)
-    
-    
+
+"""#Measure time of loop
+import time
+start = time.clock() """
+
+#old code
+#Time for 254776 messages: 3323.288668 seconds
+#Time for all 2979089 result minimum: 10.7942016982 hours
+
+#new code
+#Time for 1000 messages: 13.301362 seconds
+#Time for 2979089 messages: 11.007205894227 hours
+
+#new new code
+#Time for 1000 messages: 11.202224 second
+#Time for 2979089 messages: 9.2701173038712 hours
     
 totalNumberofWords = 0
-for m in message:
+counter = 0
+print len(message)
+print len(messageID)
+print len(timestamps)
+for m, m_id, date in zip(message, messageID, timestamps):
     #print m
     totalNumberofWords += len(m)
     lower = m.lower()
     index = 0
+    counter += 1
     
+    
+    '''
+    if counter == 1000:
+        print time.clock() - start
+        break
+    '''
+    #print counter
     #Need to tokenize to get all frequencies
     for word in listofHatewords:
         listof_lower = lower.split(" ")
@@ -123,21 +161,25 @@ for m in message:
         #https://docs.python.org/2/library/difflib.html
         #Else if check the NTLK forms of words
         #Check if there are versions of the word first though
-        if word in lower or len(difflib.get_close_matches(word, listof_lower, 1, .5)) >= 1:
+        #TOOK out "word in lower" since it was inaccurate
+        if word in listof_lower or len(difflib.get_close_matches(word, listof_lower, 1, .75)) >= 1:
             frequency[index]+=1
+            frequencyID[index].append(str(m_id) + " " + m)
+            frequencyTime[index].append(date)       
         elif len(similarWords) > 0:
-            found = False
+            #found = False
             for a in similarWords:
-                if a in lower or len(difflib.get_close_matches(a, listof_lower, 1, .5)) >= 1:
-                    found = True
-                    break
-            
-            if found is True:
-                frequency[index]+=1
-        
+                if a in listof_lower or len(difflib.get_close_matches(a, listof_lower, 1, .75)) >= 1:
+                    #found = True
+                    frequency[index]+=1
+                    frequencyID[index].append(str(m_id) + " " + m)
+                    frequencyTime[index].append(date)
+                    #print "test" + str(counter)
+                    break 
         #Increase index to make sense
         if index >= len(listofHatewords):
             print "Length error"
+        
         index+=1
 
 #check asterisk. 
@@ -146,24 +188,30 @@ for m in message:
 #Use NTLK
 #Think about software filtering methods
 
-print len(message)
-print frequency
+print "All Done" + str(len(message))
+#print frequency
 
 
 
 #Total mentions of words in posts
 #=>Treats each word in every post as equal<=
 
+jsonList = []
 
-#output list of hate words into text file
-import simplejson
+for i in range(0,1000):
+    jsonList.append({'hateword': listofHatewords[i], 'frequency': frequency[i], 'frequencyID':frequencyID[i], 'frequencyTime':frequencyTime[i]})
+    
+
+
+print(json.dumps(jsonList, indent = 1))
+
 try:
-    print listofHatewords
-    f = open('listofhatewords.json', 'w')
-    simplejson.dump(listofHatewords, f)
+    f = open(ChannelName + 'Allfrequencies'  + str(timestr) +'.json', 'w')
+    simplejson.dump(jsonList, f)
     f.close()
 except NameError:
-    print "Almost erased listofhatewords.json! Be careful!!!"
-
-
-
+    print "Almost erased" + ChannelName + "Allfrequencies.json! Be careful!!!"
+    
+    
+    
+ 
