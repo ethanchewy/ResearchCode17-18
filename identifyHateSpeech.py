@@ -88,16 +88,28 @@ print difflib.get_close_matches("dyke", test123, 10, .75)"""
 #initiate lists to set length
 frequency = []
 versionsOfWord = []
-frequencyID = []
+#frequencyID = []
 frequencyTime = []
+#Index of original message list
+listmessageID = []
+listauthors = []
+frequencyIndex = []
 for x in range(0, 1000):
     frequency.append(0)
 
+"""
 for x in range(0, 1000):
     frequencyID.append([])
+"""
+for x in range(0, 1000):
+    listmessageID.append([])
+for x in range(0, 1000):
+    listauthors.append([])
 
 for x in range(0, 1000):
     frequencyTime.append([])
+for x in range(0, 1000):
+    frequencyIndex.append([])
     
 for x in range(0, 1000):
     versionsOfWord.append([])
@@ -138,22 +150,20 @@ counter = 0
 print len(message)
 print len(messageID)
 print len(timestamps)
-for m, m_id, date in zip(message, messageID, timestamps):
+for m, m_id, date, a_id in zip(message, messageID, timestamps, authorID):
     #print m
     totalNumberofWords += len(m)
     lower = m.lower()
     index = 0
-    counter += 1
+
     
     
-    '''
-    if counter == 1000:
-        print time.clock() - start
-        break
-    '''
+    if counter%100000==0:
+        print counter
     #print counter
     #Need to tokenize to get all frequencies
     for word in listofHatewords:
+        wordLowered = word.lower()
         listof_lower = lower.split(" ")
         similarWords = versionsOfWord[index]
 
@@ -162,18 +172,25 @@ for m, m_id, date in zip(message, messageID, timestamps):
         #Else if check the NTLK forms of words
         #Check if there are versions of the word first though
         #TOOK out "word in lower" since it was inaccurate
-        if word in listof_lower or len(difflib.get_close_matches(word, listof_lower, 1, .75)) >= 1:
+        if wordLowered in listof_lower or len(difflib.get_close_matches(wordLowered, listof_lower, 1, .75)) >= 1:
             frequency[index]+=1
-            frequencyID[index].append(str(m_id) + " " + m)
-            frequencyTime[index].append(date)       
+            frequencyIndex[index].append(counter)
+            #frequencyID[index].append(str(m_id) + " " + m)
+            frequencyTime[index].append(date)
+            listmessageID[index].append(m_id)
+            listauthors[index].append(a_id)
         elif len(similarWords) > 0:
             #found = False
             for a in similarWords:
-                if a in listof_lower or len(difflib.get_close_matches(a, listof_lower, 1, .75)) >= 1:
+                aLowered = a.lower()
+                if aLowered in listof_lower or len(difflib.get_close_matches(aLowered, listof_lower, 1, .75)) >= 1:
                     #found = True
                     frequency[index]+=1
-                    frequencyID[index].append(str(m_id) + " " + m)
+                    frequencyIndex[index].append(counter)
+                    #frequencyID[index].append(str(m_id) + " " + m)
                     frequencyTime[index].append(date)
+                    listmessageID[index].append(m_id)
+                    listauthors[index].append(a_id)
                     #print "test" + str(counter)
                     break 
         #Increase index to make sense
@@ -181,6 +198,7 @@ for m, m_id, date in zip(message, messageID, timestamps):
             print "Length error"
         
         index+=1
+    counter += 1
 
 #check asterisk. 
 #Get list of words
@@ -196,22 +214,21 @@ print "All Done" + str(len(message))
 #Total mentions of words in posts
 #=>Treats each word in every post as equal<=
 
+#Process data
 jsonList = []
 
 for i in range(0,1000):
-    jsonList.append({'hateword': listofHatewords[i], 'frequency': frequency[i], 'frequencyID':frequencyID[i], 'frequencyTime':frequencyTime[i]})
+    jsonList.append({'hateword': listofHatewords[i], 'messageID': listmessageID[i], 'authorID':listauthors[i], 'frequency': frequency[i], 'frequencyIndex':frequencyIndex[i], 'frequencyTime':frequencyTime[i]})
     
+#print(json.dumps(jsonList, indent = 1))
 
-
-print(json.dumps(jsonList, indent = 1))
-
+#Put to file
+import simplejson
+import time
+timestr = time.strftime("%Y%m%d-%H%M%S")
 try:
     f = open(ChannelName + 'Allfrequencies'  + str(timestr) +'.json', 'w')
     simplejson.dump(jsonList, f)
     f.close()
 except NameError:
     print "Almost erased" + ChannelName + "Allfrequencies.json! Be careful!!!"
-    
-    
-    
- 
